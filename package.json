@@ -31,8 +31,7 @@
     "files": [
       "electron-main.cjs",
       "server.js",
-      "package.json",
-      "node_modules/**/*"
+      "package.json"
     ],
     "win": {
       "target": [
