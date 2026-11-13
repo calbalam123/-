@@ -15,7 +15,7 @@ export function initializeCountryEconomy(db) {
       treasury INTEGER NOT NULL DEFAULT 0,
       tax_rate REAL NOT NULL DEFAULT 0,
       created_by INTEGER NOT NULL,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMPSTAMP
     );
     CREATE TABLE IF NOT EXISTS country_members (
       country_id INTEGER NOT NULL,
