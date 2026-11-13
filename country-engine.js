@@ -35,7 +35,7 @@ export function initializeCountryEconomy(db) {
       FOREIGN KEY(country_id) REFERENCES countries(id),
       FOREIGN KEY(user_id) REFERENCES users(id)
     );
-    CREATE TABLE IF NOT EXISTS country_rooms (
+    CREATE TABLE IF NOT EXISTS country_active (\n      user_id INTEGER PRIMARY KEY,\n      country_id INTEGER NOT NULL,\n      FOREIGN KEY(country_id) REFERENCES countries(id),\n      FOREIGN KEY(user_id) REFERENCES users(id)\n    );\n    CREATE TABLE IF NOT EXISTS country_rooms (
       room_id TEXT PRIMARY KEY,
       country_id INTEGER NOT NULL,
       linked_by INTEGER NOT NULL,
