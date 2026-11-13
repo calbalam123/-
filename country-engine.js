@@ -15,7 +15,7 @@ export function initializeCountryEconomy(db) {
       treasury INTEGER NOT NULL DEFAULT 0,
       tax_rate REAL NOT NULL DEFAULT 0,
       created_by INTEGER NOT NULL,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMPSTAMP
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS country_members (
       country_id INTEGER NOT NULL,
@@ -35,7 +35,13 @@ export function initializeCountryEconomy(db) {
       FOREIGN KEY(country_id) REFERENCES countries(id),
       FOREIGN KEY(user_id) REFERENCES users(id)
     );
-    CREATE TABLE IF NOT EXISTS country_active (\n      user_id INTEGER PRIMARY KEY,\n      country_id INTEGER NOT NULL,\n      FOREIGN KEY(country_id) REFERENCES countries(id),\n      FOREIGN KEY(user_id) REFERENCES users(id)\n    );\n    CREATE TABLE IF NOT EXISTS country_rooms (
+    CREATE TABLE IF NOT EXISTS country_active (
+      user_id INTEGER PRIMARY KEY,
+      country_id INTEGER NOT NULL,
+      FOREIGN KEY(country_id) REFERENCES countries(id),
+      FOREIGN KEY(user_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS country_rooms (
       room_id TEXT PRIMARY KEY,
       country_id INTEGER NOT NULL,
       linked_by INTEGER NOT NULL,
@@ -71,6 +77,8 @@ function contextCountry(db, userId, roomId) {
     const linked = get(db, 'SELECT country_id FROM country_rooms WHERE room_id=?', String(roomId));
     if (linked) return get(db, 'SELECT * FROM countries WHERE id=?', linked.country_id);
   }
+  const active = get(db, 'SELECT country_id FROM country_active WHERE user_id=?', userId);
+  if (active) return get(db, 'SELECT * FROM countries WHERE id=?', active.country_id);
   return get(db, `SELECT c.* FROM country_members m JOIN countries c ON c.id=m.country_id
     WHERE m.user_id=? ORDER BY m.joined_at DESC LIMIT 1`, userId);
 }
@@ -115,6 +123,7 @@ export function handleCountryCommand({ db, user, raw, roomId = null }) {
     const tx = db.transaction(() => {
       run(db, "INSERT OR IGNORE INTO country_members(country_id,user_id,role) VALUES(?,?,'member')", country.id, user.id);
       ensureWallet(db, country, user.id);
+      run(db, 'INSERT INTO country_active(user_id,country_id) VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET country_id=excluded.country_id', user.id, country.id);
     });
     tx();
     return '🤝 ' + country.name + ' 가입 및 선택 완료!\n통화: ' + country.currency_name + ' (' + country.currency_code + ')\n.계좌 로 잔액을 확인하세요.';
